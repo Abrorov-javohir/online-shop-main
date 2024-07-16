@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
 import 'package:uy_ishi_3/cubid/product_cupid.dart';
 import 'package:uy_ishi_3/cubid/theme_cubid.dart';
 import 'package:uy_ishi_3/firebase_options.dart';
@@ -27,33 +26,38 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
+    return MultiBlocProvider(
       providers: [
-        BlocProvider(
+        BlocProvider<ProductCubit>(
           create: (context) => ProductCubit(),
         ),
-        BlocProvider(
+        BlocProvider<ThemeCubit>(
           create: (context) => ThemeCubit(),
         ),
       ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: StreamBuilder<User?>(
-          stream: FirebaseAuth.instance.authStateChanges(),
-          builder: (ctx, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (snapshot.hasData) {
-              return const HomeScreen(); // Foydalanuvchi autentifikatsiyalangan bo'lsa, HomeScreen qaytaradi
-            }
-            return const LoginScreen(); // Foydalanuvchi autentifikatsiyalanmagan bo'lsa, LoginScreen qaytaradi
-          },
-        ),
-        routes: {
-          '/home': (context) => const HomeScreen(),
-          '/login': (context) => const LoginScreen(),
-          '/register': (context) => const RegisterScreen(),
+      child: BlocBuilder<ThemeCubit, bool>(
+        builder: (context, isDarkMode) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: isDarkMode ? ThemeData.dark() : ThemeData.light(),
+            home: StreamBuilder<User?>(
+              stream: FirebaseAuth.instance.authStateChanges(),
+              builder: (ctx, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasData) {
+                  return const HomeScreen(); // Foydalanuvchi autentifikatsiyalangan bo'lsa, HomeScreen qaytaradi
+                }
+                return const LoginScreen(); // Foydalanuvchi autentifikatsiyalanmagan bo'lsa, LoginScreen qaytaradi
+              },
+            ),
+            routes: {
+              '/home': (context) => const HomeScreen(),
+              '/login': (context) => const LoginScreen(),
+              '/register': (context) => const RegisterScreen(),
+            },
+          );
         },
       ),
     );

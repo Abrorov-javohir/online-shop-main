@@ -1,7 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:uy_ishi_3/cubid/theme_cubid.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -12,6 +14,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   File? imagefile;
+
   void uploadImage(ImageSource imageSource) async {
     final imagePicker = ImagePicker();
     final XFile? pickedImage = await imagePicker.pickImage(source: imageSource);
@@ -37,14 +40,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 onPressed: () {
                   uploadImage(ImageSource.camera);
                 },
-                icon: Icon(Icons.camera),
+                icon: const Icon(Icons.camera),
               ),
               IconButton(
                 onPressed: () {
                   uploadImage(ImageSource.gallery);
                 },
                 icon: const Icon(Icons.image),
-              )
+              ),
             ],
           ),
           if (imagefile != null)
@@ -53,6 +56,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
               height: 500,
               child: Image.file(imagefile!),
             ),
+          BlocBuilder<ThemeCubit, bool>(
+            builder: (context, isDarkMode) {
+              return SwitchListTile(
+                title: const Text("Change Theme"),
+                value: isDarkMode,
+                onChanged: (bool value) {
+                  context.read<ThemeCubit>().changeTheme();
+                },
+              );
+            },
+          ),
         ],
       ),
     );
